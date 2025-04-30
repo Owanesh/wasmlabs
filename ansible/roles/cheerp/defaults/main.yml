@@ -1,0 +1,9 @@
+cheerp_dest: /opt/cheerp
+cheerp_branch: cheerp-3.0
+cheerp_repo_base: https://github.com/leaningtech
+cheerp_repos:
+  - cheerp-compiler
+  - cheerp-utils
+  - cheerp-musl
+  - cheerp-libs
+cheerp_build_dir: "{{ ansible_env.HOME }}/cheerp"

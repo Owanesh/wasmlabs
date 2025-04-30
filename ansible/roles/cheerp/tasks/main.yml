@@ -1,0 +1,13 @@
+---
+  - name: Include install tasks
+    include_tasks: install.yml
+    when: cheerp_action == 'install'
+
+  - name: Include uninstall tasks
+    include_tasks: uninstall.yml
+    when: cheerp_action == 'remove'
+
+  - name: Always run verification
+    include_tasks: verify.yml
+
+

@@ -1,0 +1,25 @@
+---
+  - name: Remove cheerp-core package
+    apt:
+      name: cheerp-core
+      state: absent
+
+
+  - name: Remove cheerp PPA repository
+    apt_repository:
+      repo: ppa:leaningtech-dev/cheerp-ppa
+      state: absent
+  
+  - name: List files in /etc/apt/sources.list.d
+    command: ls /etc/apt/sources.list.d
+    register: sources_list
+    changed_when: false
+
+  - name: Remove unwanted PPA source list
+    file:
+      path: "/etc/apt/sources.list.d/{{ item }}"
+      state: absent
+    loop: "{{ sources_list.stdout_lines }}"
+    when: "'ppa_leaningtech_dev_cheerp_ppa_noble.list' in item"
+    notify:
+      - Update APT cache

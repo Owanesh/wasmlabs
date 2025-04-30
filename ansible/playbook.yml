@@ -1,0 +1,5 @@
+- name: Setup WebAssembly Toolchain
+  hosts: localhost
+  become: yes
+  roles:
+    - cheerp

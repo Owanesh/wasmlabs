@@ -1,0 +1,13 @@
+---
+- name: Add Cheerp APT repository
+  apt_repository:
+    repo: "ppa:leaningtech-dev/cheerp-ppa"
+    state: present
+    update_cache: yes
+
+- name: Install Cheerp Compiler
+  apt:
+    name: cheerp-core
+    state: present
+    update_cache: yes
+

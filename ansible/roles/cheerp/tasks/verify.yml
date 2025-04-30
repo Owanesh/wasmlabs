@@ -1,0 +1,9 @@
+---
+- name: Check if Cheerp is installed
+  stat:
+    path: "{{ cheerp_dest }}/bin/clang++"
+  register: cheerp_installed
+
+- name: Print cheerp status
+  debug:
+    msg: "Cheerp is {{ 'installed' if cheerp_installed.stat.exists else 'NOT installed' }}"
