@@ -1,25 +1,44 @@
-// src/wasi_override.h
 #ifndef WASI_OVERRIDE_H
 #define WASI_OVERRIDE_H
 
-// tipi di processo
-typedef int pid_t;
-static pid_t getpid(void)  { return 1; }
-static pid_t getppid(void) { return 1; }
-
-// timer e segnale
-static unsigned int alarm(unsigned int seconds) { (void)seconds; return 0; }
-//static void signal(int sig, void (*handler)(int)) { (void)sig; (void)handler; }
-
-// busy-wait wake_me
+#ifdef __wasm__
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
 #include <time.h>
-static void wake_me(int seconds, void (*handler)(int)) {
-    struct timespec start, now;
-    clock_gettime(CLOCK_REALTIME, &start);
-    do {
-        clock_gettime(CLOCK_REALTIME, &now);
-    } while ((now.tv_sec - start.tv_sec) < seconds);
-    handler(0);
+#include <unistd.h>
+
+extern volatile unsigned long iter;
+
+static void (*callback_func)(void);
+
+void* timer_thread(void* arg) {
+    int seconds = *(int*)arg;
+    sleep(seconds);
+    callback_func();
+    return NULL;
 }
+
+void wake_me(int seconds, void (*func)(void)) {
+    pthread_t tid;
+    callback_func = func;
+
+    if (pthread_create(&tid, NULL, timer_thread, &seconds) != 0) {
+        fprintf(stderr, "Failed to create timer thread\n");
+        func(); // fallback
+        return;
+    }
+
+    pthread_detach(tid);
+}
+
+
+#endif
+
+
+#ifndef __wasm__
+#include <sys/types.h>
+#include <sys/wait.h>
+#endif
 
 #endif // WASI_OVERRIDE_H
