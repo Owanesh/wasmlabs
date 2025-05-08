@@ -22,11 +22,30 @@ The C program is very simple and uses `pthread` to handle the threads.
 To compile the code to WebAssembly using **Emscripten** and execute, run the following command:
 
 ```bash
-bash thread_spawn.sh
+bash tcompiler.sh <file>
+```
+```bash 
+ bash tcompiler.sh thread_callback.c
+Compiling with emcc...
 emcc: warning: -pthread + ALLOW_MEMORY_GROWTH may run non-wasm code slowly, see https://github.com/WebAssembly/design/issues/1271 [-Wpthreads-mem-growth]
 
-[OK ] Enter thread 🧵👨‍💻
-Exit 👋
+Running emcc compiled code...
+
+🟡 In main, before creating thread...
+⏳ Waiting for 1 seconds...
+✅ Callback called after the wait.
+🟢 Thread created. Joining...
+[OK ] Enter thread
+✅ Exit main
+
+Compiling with wasm32-wasi-threads-clang...
+
+Running wasm32-wasi-threads-clang compiled code...
+
+🟡 In main, before creating thread...
+⏳ Waiting for 1 seconds...
+✅ Callback called after the wait.
+🟢 Thread created. Joining...
 ```
 
 

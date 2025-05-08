@@ -16,7 +16,7 @@
 ## 📦 What's Inside
 
 - 🔄 `Makefile` – A minimal Makefile to build selected benchmarks (`arithoh`, `dhry2`, `whetstone-double`) for WASI.
-- 🧩 `src/` – Source code patches and overrides (`wasi_override.h`) to stub missing POSIX APIs in WASI.
+- 🧩 `src/` – Source code patches and overrides (`wasitime.h`) to stub missing POSIX APIs in WASI.
 - 📊 `benchmarks/` *(coming soon)* – Scripts and data for running and comparing results.
 
 
