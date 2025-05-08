@@ -15,7 +15,7 @@
 
 ## 📦 What's Inside
 
-- 🔄 `MakefileWasm` – A minimal Makefile to build selected benchmarks (`arithoh`, `dhry2`, `whetstone-double`) for WASI.
+- 🔄 `Makefile` – A minimal Makefile to build selected benchmarks (`arithoh`, `dhry2`, `whetstone-double`) for WASI.
 - 🧩 `src/` – Source code patches and overrides (`wasi_override.h`) to stub missing POSIX APIs in WASI.
 - 📊 `benchmarks/` *(coming soon)* – Scripts and data for running and comparing results.
 
@@ -23,20 +23,22 @@
 ## 🚀 Getting Started
 
 1. **Install WASI SDK** (e.g., at `/opt/wasi-sdk`). 🛠️
-2. **Clone byte-unixbench** repo
+2. **Clone byte-unixbench** repo (change timeit.c, we will use `wasitime.h`)
 
     ```c 
-    // timeit.c
-    #ifndef __wasm32__
-    void wake_me(seconds, func)
-        int seconds;
-        void (*func)();
+    #ifdef __GNUC__
+    #include <signal.h>
+    #include <unistd.h>
+
+    void wake_me(seconds, func) int seconds;
+    void (*func)();
     {
         /* set up the signal handler */
         signal(SIGALRM, func);
         /* get the clock running */
         alarm(seconds);
     }
+
     #endif
     ```
 
@@ -46,7 +48,7 @@
     ```
 4. **Run with a WASI runtime** (Wasmtime or Wasmer):
    ```bash
-    ➜ wasmtime wasibench/whetstone-double.wasm 1
+    ➜ wasmer wasibench/whetstone-double.wasm 1
 
 
     Calibrate
