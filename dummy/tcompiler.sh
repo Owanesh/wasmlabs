@@ -23,15 +23,19 @@ echo "----------------------"
 
 echo "Compiling with emcc... 🔨"
 emcc "$SOURCE_FILE" \
+    -include ../wasitime.h \
     -Wno-unused-command-line-argument -Wno-format \
     -Wl,--shared-memory -pthread -Darithoh \
+    -Wno-deprecated-non-prototype \
     -O2 \
     -s ASSERTIONS=0 \
+    	-s EXIT_RUNTIME=1 \
     -s USE_PTHREADS=1 \
+    -s PROXY_TO_PTHREAD=1 \
     -s PTHREAD_POOL_SIZE=4 \
-    -s ASYNCIFY=1 \
     -s WASM_ASYNC_COMPILATION=1 \
-    -s ALLOW_MEMORY_GROWTH=1 \
+    -s ENVIRONMENT=node \
+    -s ALLOW_MEMORY_GROWTH=0 \
     -s TOTAL_MEMORY=256MB \
     -s STACK_SIZE=5242880 \
     -o "/tmp/${BASE_NAME}__emcc.js"
@@ -39,31 +43,32 @@ emcc "$SOURCE_FILE" \
 echo "Running emcc compiled code... 🚀"
 echo "----------------------"
 
-node "/tmp/${BASE_NAME}__emcc.js" --verbose
+node "/tmp/${BASE_NAME}__emcc.js" 1
 
-# Compile with wasm32-wasi-threads-clang
-echo "----------------------"
-echo "Compiling with wasm32-wasi-threads-clang... 🔨"
-echo "📦 Target: /tmp/${BASE_NAME}__wasix.wasm"
-echo "⏳ Please wait, compiling..."
-/opt/wasi-sdk/bin/wasm32-wasi-threads-clang "$SOURCE_FILE" \
-  -o "/tmp/${BASE_NAME}__wasix.wasm" \
-  --target=wasm32-wasi \
-  --sysroot=/opt/wasi-sdk/wasix/sysroot \
-  -pthread -D_WASI_EMULATED_PTHREAD \
-  -Wno-implicit-function-declaration -Wformat \
-  -Wl,--export-all,--shared-memory,--max-memory=134217728,--initial-memory=131072
+# # Compile with wasm32-wasi-threads-clang
+# echo "----------------------"
+# echo "Compiling with wasm32-wasi-threads-clang... 🔨"
+# echo "📦 Target: /tmp/${BASE_NAME}__wasix.wasm"
+# echo "⏳ Please wait, compiling..."
+# /opt/wasi-sdk/bin/wasm32-wasi-threads-clang "$SOURCE_FILE" \
+#   -o "/tmp/${BASE_NAME}__wasix.wasm" \
+#   --target=wasm32-wasi -include ../wasitime.h \
+#   --sysroot=/opt/wasi-sdk/wasix/sysroot -Darithoh \
+#   -pthread -D_WASI_EMULATED_PTHREAD \
+#   -Wno-implicit-function-declaration -Wformat \
+#   -Wno-deprecated-non-prototype \
+#   -Wl,--export-all,--shared-memory,--max-memory=134217728,--initial-memory=131072
 
-echo "Running wasm32-wasi-threads-clang compiled code... 🏃‍♂️"
-echo "----------------------"
+# echo "Running wasm32-wasi-threads-clang compiled code... 🏃‍♂️"
+# echo "----------------------"
 
-wasmer run --enable-threads "/tmp/${BASE_NAME}__wasix.wasm" \
-  --env WASIX_PTHREAD_POOL_SIZE=4 \
-  --env WASIX_PTHREAD_STACK_SIZE=5242880 \
-  --env WASIX_PTHREAD_MAX_MEMORY=134217728 \
-  --env WASIX_PTHREAD_MAX_STACK_SIZE=5242880
-echo "----------------------"
-echo "✅ Finished executing the script!"
-echo "🗑️ Cleaning up temporary files..."
-rm -f "/tmp/${BASE_NAME}__emcc.js" "/tmp/${BASE_NAME}__wasix.wasm"
-echo "🗑️ Temporary files cleaned up!"
+# wasmer run --enable-threads "/tmp/${BASE_NAME}__wasix.wasm" 1 \
+#   --env WASIX_PTHREAD_POOL_SIZE=4 \
+#   --env WASIX_PTHREAD_STACK_SIZE=5242880 \
+#   --env WASIX_PTHREAD_MAX_MEMORY=134217728 \
+#   --env WASIX_PTHREAD_MAX_STACK_SIZE=5242880
+# echo "----------------------"
+# echo "✅ Finished executing the script!"
+# echo "🗑️ Cleaning up temporary files..."
+# rm -f "/tmp/${BASE_NAME}__emcc.js" "/tmp/${BASE_NAME}__wasix.wasm"
+# echo "🗑️ Temporary files cleaned up!"

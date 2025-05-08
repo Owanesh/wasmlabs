@@ -1,70 +1,46 @@
-#if defined(__EMSCRIPTEN__)
-#include <emscripten.h>
-#include <stdlib.h>
+#if defined(__EMSCRIPTEN__) || defined(__wasix__) || defined(__wasi__)
+#ifndef WASITIME_H
+#define WASITIME_H
 
-void wake_me(int seconds, void (*func)());
-
-// Global function pointer
-static void (*callback_func)() = NULL;
-
-void call_callback_func(void *arg)
-{
-	if (callback_func)
-	{
-		callback_func(); // calls report()
-	}
-}
-
-void wake_me(int seconds, void (*func)())
-{
-	callback_func = func;
-	emscripten_set_timeout(call_callback_func, seconds * 1000, NULL);
-}
-
-#elif defined(__wasix__) || defined(__wasi__)
-#include <time.h>
-#include <unistd.h>
-#include <pthread.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <unistd.h>  // for sleep()
 
-void wake_me(int seconds, void (*func)());
+typedef void (*callback_t)(void);
 
-// Thread wrapper for WASIX with infinite loop and debug output
-static void* wasix_timer_thread(void* arg) {
-    struct {
-        int seconds;
-        void (*func)();
-    } *args = arg;
+typedef struct {
+    int seconds;
+    callback_t cb;
+} TimerArgs;
 
-    printf("[wake_me] Timer thread started. Interval: %d seconds\n", args->seconds);
+void* timer_thread(void* arg) {
+    TimerArgs* args = (TimerArgs*)arg;
 
-    while (1) {
-        sleep(args->seconds);
-        if (args->func) {
-            printf("[wake_me] Triggering callback...\n");
-            args->func();
-        } else {
-            printf("[wake_me] No callback function set.\n");
-        }
+    sleep(args->seconds);
+
+    if (args->cb) {
+        args->cb();
     }
 
-    free(arg); // This will never be reached, but left for completeness
+    free(args);
     return NULL;
 }
 
-void wake_me(int seconds, void (*func)()) {
-    pthread_t tid;
-    void* args = malloc(sizeof(struct { int seconds; void (*func)(); }));
-    ((struct { int seconds; void (*func)(); }*)args)->seconds = seconds;
-    ((struct { int seconds; void (*func)(); }*)args)->func = func;
+void wake_me(int seconds, callback_t cb) {
+    TimerArgs* args = malloc(sizeof(TimerArgs));
+    args->seconds = seconds;
+    args->cb = cb;
 
-    if (pthread_create(&tid, NULL, wasix_timer_thread, args) != 0) {
-        perror("[wake_me] Failed to create timer thread");
-        free(args);
+    pthread_t tid;
+    if (pthread_create(&tid, NULL, timer_thread, args) == 0) {
+        pthread_detach(tid);  // Let it clean up on its own
+        printf("🟢 Background thread started. Main thread is free to continue...\n");
     } else {
-        pthread_detach(tid);
-        printf("[wake_me] Timer thread launched.\n");
+        printf("❌ Failed to create thread\n");
+        free(args);
     }
 }
+
+#endif
 #endif
