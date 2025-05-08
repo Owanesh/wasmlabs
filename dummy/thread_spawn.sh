@@ -2,7 +2,6 @@
 
 # Ensure the source file exists
 SOURCE_FILE="thread_spawn.c"
-OUTFILE="/tmp/thread_spawn.js"
 
 if [ ! -f "$SOURCE_FILE" ]; then
     echo "Source file $SOURCE_FILE does not exist!"
@@ -22,6 +21,25 @@ emcc $SOURCE_FILE \
     -sALLOW_MEMORY_GROWTH=1 \
     -sTOTAL_MEMORY=256MB \
     -sSTACK_SIZE=5242880 \
-    -o $OUTFILE
+    -o /tmp/thread_spawn__emcc.js
 
-node $OUTFILE
+
+echo "Running emcc compiled code..."
+node /tmp/thread_spawn__emcc.js
+
+echo "Compiling with wasm32-wasi-threads-clang..."
+/opt/wasi-sdk/bin/wasm32-wasi-threads-clang thread_spawn.c \
+  -o /tmp/thread_spawn__wasix.wasm \
+  --target=wasm32-wasi \
+  --sysroot=/opt/wasi-sdk/wasix/sysroot \
+  -pthread -D_WASI_EMULATED_PTHREAD \
+  -Wno-implicit-function-declaration -Wformat \
+  -Wl,--export-all,--shared-memory,--max-memory=134217728,--initial-memory=131072
+
+echo "Running wasm32-wasi-threads-clang compiled code..."
+
+ wasmer run --enable-threads /tmp/thread_spawn__wasix.wasm \
+  --env WASIX_PTHREAD_POOL_SIZE=4 \
+  --env WASIX_PTHREAD_STACK_SIZE=5242880 \
+  --env WASIX_PTHREAD_MAX_MEMORY=134217728 \
+  --env WASIX_PTHREAD_MAX_STACK_SIZE=5242880
