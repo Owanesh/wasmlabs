@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ── Configuration ──────────────────────────────────────────────────────────────
+
+WASM_DIR="./wasibench"
+NODE_RUNNER="node"
+
+all_tests=(
+  arithoh register short int long float double
+  pipe  fstime syscall hanoi  whetstone-double
+)
+
+# missing execl, spawn,looper and context
+
+# ── Runner helper ─────────────────────────────────────────────────────────────
+run_test(){
+  local name=$1
+  local secs=$2
+  local js="$WASM_DIR/${name}.js"
+
+  echo "=== ${name} (${secs}s) ==="
+  $NODE_RUNNER "$js" "$secs"
+  echo
+}
+
+# ── Main loop ─────────────────────────────────────────────────────────────────
+echo ">>> UnixBench (EMCC / Node.js) <<<"
+echo
+
+for t in "${all_tests[@]}"; do
+    run_test "$t" 1
+done
+
+echo ">>> All tests completed"

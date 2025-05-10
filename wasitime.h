@@ -35,9 +35,7 @@ void wake_me(int seconds, callback_t cb) {
     pthread_t tid;
     if (pthread_create(&tid, NULL, timer_thread, args) == 0) {
         pthread_detach(tid);  // Let it clean up on its own
-        printf("🟢 Background thread started. Main thread is free to continue...\n");
     } else {
-        printf("❌ Failed to create thread\n");
         free(args);
     }
 }
