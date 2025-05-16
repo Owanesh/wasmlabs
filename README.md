@@ -17,16 +17,18 @@
 
 - 🔄 `Makefile` – A minimal Makefile to build selected benchmarks (`arithoh`, `dhry2`, `whetstone-double`) for WASI.
 - 🧩 `src/` – Source code patches and overrides (`wasitime.h`) to stub missing POSIX APIs in WASI.
-- 📊 `benchmarks/` *(coming soon)* – Scripts and data for running and comparing results.
+- 📊 `results/` – Scripts and data for running and comparing results.
 
 
 ## 🚀 Getting Started
 
 1. **Install WASI SDK** (e.g., at `/opt/wasi-sdk`). 🛠️
-2. **Clone byte-unixbench** repo (change timeit.c, we will use `wasitime.h`)
+2. **Clone byte-unixbench** repo 
+3. **Tune original bench suite**
 
+    - **src/ime.c** : since webassembly doesn't provide support for Signal/Alarm we need to avoid that this file is considered during compilation for wasm target
     ```c 
-    #ifdef __GNUC__
+    #if defined(__GNUC__) && !defined(__wasi__)&& !defined(__EMSCRIPTEN__) && !defined(__wasix__)
     #include <signal.h>
     #include <unistd.h>
 
@@ -41,33 +43,18 @@
 
     #endif
     ```
+    - **src/syscall.c**, swap at lines 82 and 97 `syscall(SYS_getpid);` with `getpid();`
+
+    
 
 3. **Build the benchmarks**:
     ```bash
     make all
     ```
-4. **Run with a WASI runtime** (Wasmtime or Wasmer):
+4. **Run with a Node runtime**: adaptation of original Perl script
    ```bash
-    ➜ wasmer wasibench/whetstone-double.wasm 1
-
-
-    Calibrate
-        0.00 Seconds          1   Passes (x 100)
-        0.00 Seconds          5   Passes (x 100)
-        0.02 Seconds         25   Passes (x 100)
-        0.11 Seconds        125   Passes (x 100)
-        0.53 Seconds        625   Passes (x 100)
-    Use 11687  passes (x 100)
-
-        Double Precision C/C++ Whetstone Benchmark
-    [...]
-
-    COUNT|11620.709|0|MWIPS
-    TIME|10.057
+    ./Run 
    ```
-5. **Compare** against native builds:
-   ```bash
-   <path_of_unixbench>/pgms/whetstone-double 1
-   ```
+
 
  

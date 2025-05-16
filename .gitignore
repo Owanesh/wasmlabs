@@ -1,3 +1,5 @@
 .vscode/
 byte-unixbench/
-wasibench/
+wasibench/*.js
+wasibench/*.wasm
+results/
