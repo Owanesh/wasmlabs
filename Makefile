@@ -1,7 +1,6 @@
 # Configuration
-WASIX_SYSROOT = /path/to/wasix-sysroot
 CC            = emcc
-WASI_OVERRIDE = wasitime.h
+WASI_OVERRIDE = src_patch/wasitime.h
 
 # Common flags
 COMMON_WARNINGS = \
@@ -29,7 +28,7 @@ LDFLAGS =
 # Directories
 OUTDIR = wasibench
 SRCDIR = byte-unixbench/UnixBench/src
-
+SRCPATCHDIR = src_patch
 # Targets
 TARGETS = \
   $(OUTDIR)/arithoh.js \
@@ -47,9 +46,11 @@ TARGETS = \
   $(OUTDIR)/syscall.js \
   $(OUTDIR)/looper.js \
   $(OUTDIR)/whetstone-double.js
-#   $(OUTDIR)/context1.js 
+#   $(OUTDIR)/context1.js \
+  # $(PROGDIR)/dhry2.js \
+  # $(PROGDIR)/dhry2reg.js
 
-.PHONY: all clean
+.PHONY: all clean run
 
 all: $(OUTDIR) $(TARGETS)
 
@@ -85,8 +86,6 @@ $(OUTDIR)/pipe.js: $(SRCDIR)/pipe.c
 $(OUTDIR)/execl.js: $(SRCDIR)/execl.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-$(OUTDIR)/spawn.js: $(SRCDIR)/spawn.c
-	$(CC) $(CFLAGS) -o $@ $^
 
 $(OUTDIR)/hanoi.js: $(SRCDIR)/hanoi.c
 	$(CC) $(CFLAGS) -g -o $@ $^
@@ -100,15 +99,37 @@ $(OUTDIR)/syscall.js: $(SRCDIR)/syscall.c
 # $(OUTDIR)/context1.js: $(SRCDIR)/context1.c
 # 	$(CC) $(CFLAGS) -o $@ $^
 
-$(OUTDIR)/looper.js: $(SRCDIR)/looper.c
+# === PATCHED ===
+$(OUTDIR)/looper.js: $(SRCPATCHDIR)/looper.c
+	$(CC) $(CFLAGS) -o $@ $^
+
+$(OUTDIR)/spawn.js: $(SRCPATCHDIR)/spawn.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 # === whetstone ===
 $(OUTDIR)/whetstone-double.js: $(SRCDIR)/whets.c
 	$(CC) $(CFLAGS) -DDP -DGTODay -DUNIXBENCH -o $@ $<
 
+
+# $(PROGDIR)/dhry2.js: CFLAGS += -DHZ=${HZ}
+# $(PROGDIR)/dhry2.js: $(SRCDIR)/dhry_1.c $(SRCDIR)/dhry_2.c \
+#                   $(SRCDIR)/dhry.h $(SRCDIR)/timeit.c
+# 	$(CC) -o $@ ${CFLAGS} $(SRCDIR)/dhry_1.c $(SRCDIR)/dhry_2.c
+
+# $(PROGDIR)/dhry2reg.js: CFLAGS += -DHZ=${HZ} -DREG=register
+# $(PROGDIR)/dhry2reg.js: $(SRCDIR)/dhry_1.c $(SRCDIR)/dhry_2.c \
+#                      $(SRCDIR)/dhry.h $(SRCDIR)/timeit.c
+# 	$(CC) -o $@ ${CFLAGS} $(SRCDIR)/dhry_1.c $(SRCDIR)/dhry_2.c
+
+
+
+
+
+
 # === Clean ===
 clean:
 	rm -rf $(OUTDIR)/*.js
 	rm -rf $(OUTDIR)/*.wasm
 
+run:
+	bash ./Run
