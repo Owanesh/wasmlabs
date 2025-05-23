@@ -93,7 +93,7 @@ my $BINDIR = getDir('UB_BINDIR', $FindBin::Bin . "/wasibench");
 my $BIN_MULTI_DIR = getDir('UB_BIN_MULTI_DIR', $FindBin::Bin . "/byte-unixbench/UnixBench/pgms");
 
 # Temp directory, for temp files.
-#my $TMPDIR = getDir('UB_TMPDIR', $FindBin::Bin . "/tmp");
+# my $TMPDIR = getDir('UB_TMPDIR', $FindBin::Bin . "/tmp");
 my $TMPDIR = getDir('UB_TMPDIR', "./tmp");
 
 # Directory to put results in.
@@ -131,10 +131,11 @@ my $fs = [
 ];
 
 my $oldsystem = [
-    
-     "fstime", "fsbuffer", "fsdisk", "pipe", 
-     #"context1", "execl",  # not  implemented yet
-    "syscall", "spawn"
+    #"execl", 
+    "fstime", "fsbuffer", "fsdisk", "pipe", 
+    "context1",
+    "spawn",
+    "syscall"
 ];
 
 my $system = [
@@ -143,25 +144,26 @@ my $system = [
 
 my $index = [
    #"dhry2reg",
-   # "whetstone-double",
-     @$oldsystem, "shell1", "shell8"
+    #"whetstone-double", 
+    @$oldsystem, "shell1", "shell8"
 ];
- my $graphics = [
-     "2d-rects", "2d-ellipse", "2d-aashapes", "2d-text", "2d-blit",
-     "2d-window", "ubgears"
- ];
+
+my $graphics = [
+    "2d-rects", "2d-ellipse", "2d-aashapes", "2d-text", "2d-blit",
+    "2d-window", "ubgears"
+];
 
 
 # List of all supported test names.
 my $testList = {
     # Individual tests.
-    #"dhry2reg"      => undef,
+    "dhry2reg"      => undef,
     "whetstone-double"   => undef,
     "syscall"       => undef,
     "pipe"          => undef,
-    #"context1"      => undef,
+    "context1"      => undef,
     "spawn"         => undef,
-    #"execl"         => undef,
+    "execl"         => undef,
     "fstime-w"      => undef,
     "fstime-r"      => undef,
     "fstime"        => undef,
@@ -186,10 +188,23 @@ my $testList = {
     "grep"          => undef,
     "sysexec"       => undef,
 
+    "2d-rects"      => undef,
+    "2d-lines"      => undef,
+    "2d-circle"     => undef,
+    "2d-ellipse"    => undef,
+    "2d-shapes"     => undef,
+    "2d-aashapes"   => undef,
+    "2d-polys"      => undef,
+    "2d-text"       => undef,
+    "2d-blit"       => undef,
+    "2d-window"     => undef,
+
+    "ubgears"       => undef,
+
     # Named combos and shorthands.
     "arithmetic"    => $arithmetic,
-    #"dhry"          => [ "dhry2reg" ],
-    #"dhrystone"     => [ "dhry2reg" ],
+    "dhry"          => [ "dhry2reg" ],
+    "dhrystone"     => [ "dhry2reg" ],
     "whets"         => [ "whetstone-double" ],
     "whetstone"     => [ "whetstone-double" ],
     "load"          => [ "shell" ],
@@ -206,7 +221,7 @@ my $testList = {
 
     # The tests which constitute the official index plus the graphics
     # index.
-    "gindex"         => [ @$index, @$graphics  ],
+    "gindex"         => [ @$index, @$graphics ],
 };
 
 
@@ -230,12 +245,12 @@ my $testParams = {
     ## System Benchmarks    ##
     ##########################
 
-    # "dhry2reg" => {
-    #     "logmsg" => "Dhrystone 2 using register variables",
-    #     "cat"    => 'system',
-    #     "options" => "10",
-    #     "repeat" => 'long',
-    # },
+    "dhry2reg" => {
+        "logmsg" => "Dhrystone 2 using register variables",
+        "cat"    => 'system',
+        "options" => "10",
+        "repeat" => 'long',
+    },
     "whetstone-double" => {
         "logmsg" => "Double-Precision Whetstone",
         "cat"    => 'system',
@@ -247,12 +262,12 @@ my $testParams = {
         "repeat" => 'long',
         "options" => "10",
     },
-    # "context1" => {
-    #     "logmsg" => "Pipe-based Context Switching",
-    #     "cat"    => 'system',
-    #     "repeat" => 'long',
-    #     "options" => "10",
-    # },
+    "context1" => {
+        "logmsg" => "Pipe-based Context Switching",
+        "cat"    => 'system',
+        "repeat" => 'long',
+        "options" => "10",
+    },
     "pipe" => {
         "logmsg" => "Pipe Throughput",
         "cat"    => 'system',
@@ -991,7 +1006,7 @@ sub getSystemInfo {
     }
 
     # Get graphics hardware info.
-    #$info->{'graphics'} = getCmdOutput("3dinfo | cut -f1 -d\'(\'");
+    $info->{'graphics'} = getCmdOutput("3dinfo | cut -f1 -d\'(\'");
 
     # Get system run state, load and usage info.
     $info->{'runlevel'} = getCmdOutput("who -r | awk '{print \$3}'");
@@ -1627,9 +1642,9 @@ sub displaySystem {
         }
     }
 
-    # if ($info->{'graphics'}) {
-    #     printf $fd "   Graphics: %s\n", $info->{'graphics'};
-    # }
+    if ($info->{'graphics'}) {
+        printf $fd "   Graphics: %s\n", $info->{'graphics'};
+    }
 
     # Display system load and usage info.
     printf $fd "   %s; runlevel %s\n\n", $info->{'load'}, $info->{'runlevel'};
@@ -1758,7 +1773,7 @@ sub summarizeRunCsvHeader {
     printf $reportFd "\n";
 }
 
-# Write CSV data rows per concurrency as "node ./Run -c 1 -c 2".
+# Write CSV data rows per concurrency as "./Run -c 1 -c 2".
 #   e.g.: 1,33526940.9,3623.9
 #         2,30386997.8,3678.8
 #         4,31439797.3,3781.4
@@ -1883,12 +1898,12 @@ sub displaySystemHtml {
     }
 
     # Display graphics hardware info.
-    # if ($info->{'graphics'}) {
-    #     printf $fd "<tr>\n";
-    #     printf $fd "   <td><b>Graphics:</b></td>\n";
-    #     printf $fd "   <td colspan=2>%s</td>\n", $info->{'graphics'};
-    #     printf $fd "</tr>\n";
-    # }
+    if ($info->{'graphics'}) {
+        printf $fd "<tr>\n";
+        printf $fd "   <td><b>Graphics:</b></td>\n";
+        printf $fd "   <td colspan=2>%s</td>\n", $info->{'graphics'};
+        printf $fd "</tr>\n";
+    }
 
     # Display system runlevel, load and usage info.
     printf $fd "<tr>\n";
@@ -2072,7 +2087,7 @@ sub main {
     }
 
     # Display the program banner.
-    system("cat \"${BINDIR}/unixbench.wasm.logo\"");
+    system("cat \"${BINDIR}/unixbench.logo\"");
 
     # Show output output directories, if not in quiet mode.
     if ($verbose > $quietMode) {
