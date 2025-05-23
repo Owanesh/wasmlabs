@@ -9,7 +9,6 @@ COMMON_WARNINGS = \
     -Wno-deprecated-non-prototype \
 
 CFLAGS = \
-    -include $(WASI_OVERRIDE) \
   	-O2 \
 	-s ASSERTIONS=0 \
     -s EXIT_RUNTIME=1 \
@@ -22,6 +21,12 @@ CFLAGS = \
     -s TOTAL_MEMORY=256MB \
     -s STACK_SIZE=5242880 \
   $(COMMON_WARNINGS)
+
+CFLAGS_TIMEIT = \
+    -include $(WASI_OVERRIDE) \
+  $(CFLAGS)
+
+
 
 LDFLAGS =
 
@@ -39,16 +44,16 @@ TARGETS = \
   $(OUTDIR)/float.js \
   $(OUTDIR)/double.js \
   $(OUTDIR)/pipe.js \
-  $(OUTDIR)/execl.js \
   $(OUTDIR)/spawn.js \
   $(OUTDIR)/hanoi.js \
   $(OUTDIR)/fstime.js \
   $(OUTDIR)/syscall.js \
   $(OUTDIR)/looper.js \
-  $(OUTDIR)/whetstone-double.js
-#   $(OUTDIR)/context1.js \
-  # $(PROGDIR)/dhry2.js \
-  # $(PROGDIR)/dhry2reg.js
+  $(OUTDIR)/whetstone-double.js \
+  $(OUTDIR)/context1.js 
+# $(OUTDIR)/dhry2.js\
+# $(OUTDIR)/dhry2reg.js
+# $(OUTDIR)/execl.js \
 
 .PHONY: all clean run
 
@@ -59,71 +64,69 @@ $(OUTDIR):
 
 # === arithoh and variants ===
 $(OUTDIR)/arithoh.js: $(SRCDIR)/arith.c
-	$(CC) $(CFLAGS) -Darithoh -o $@ $^
+	$(CC) $(CFLAGS_TIMEIT) -Darithoh -o $@ $^
 
 $(OUTDIR)/register.js: $(SRCDIR)/arith.c
-	$(CC) $(CFLAGS) -Ddatum='register int' -o $@ $^
+	$(CC) $(CFLAGS_TIMEIT) -Ddatum='register int' -o $@ $^
 
 $(OUTDIR)/short.js: $(SRCDIR)/arith.c
-	$(CC) $(CFLAGS) -Ddatum=short -o $@ $^
+	$(CC) $(CFLAGS_TIMEIT) -Ddatum=short -o $@ $^
 
 $(OUTDIR)/int.js: $(SRCDIR)/arith.c
-	$(CC) $(CFLAGS) -Ddatum=int -o $@ $^
+	$(CC) $(CFLAGS_TIMEIT) -Ddatum=int -o $@ $^
 
 $(OUTDIR)/long.js: $(SRCDIR)/arith.c
-	$(CC) $(CFLAGS) -Ddatum=long -o $@ $^
+	$(CC) $(CFLAGS_TIMEIT) -Ddatum=long -o $@ $^
 
 $(OUTDIR)/float.js: $(SRCDIR)/arith.c
-	$(CC) $(CFLAGS) -Ddatum=float -o $@ $^
+	$(CC) $(CFLAGS_TIMEIT) -Ddatum=float -o $@ $^
 
 $(OUTDIR)/double.js: $(SRCDIR)/arith.c
-	$(CC) $(CFLAGS) -Ddatum=double -o $@ $^
+	$(CC) $(CFLAGS_TIMEIT) -Ddatum=double -o $@ $^
 
 # === individual tests ===
 $(OUTDIR)/pipe.js: $(SRCDIR)/pipe.c
-	$(CC) $(CFLAGS) -o $@ $^
-
-$(OUTDIR)/execl.js: $(SRCDIR)/execl.c
-	$(CC) $(CFLAGS) -o $@ $^
-
+	$(CC) $(CFLAGS_TIMEIT) -o $@ $^
 
 $(OUTDIR)/hanoi.js: $(SRCDIR)/hanoi.c
-	$(CC) $(CFLAGS) -g -o $@ $^
+	$(CC) $(CFLAGS_TIMEIT) -g -o $@ $^
 
 $(OUTDIR)/fstime.js: $(SRCDIR)/fstime.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 $(OUTDIR)/syscall.js: $(SRCDIR)/syscall.c
-	$(CC) $(CFLAGS) -o $@ $^
-
-# $(OUTDIR)/context1.js: $(SRCDIR)/context1.c
-# 	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS_TIMEIT) -o $@ $^
 
 # === PATCHED ===
 $(OUTDIR)/looper.js: $(SRCPATCHDIR)/looper.c
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS_TIMEIT) -o $@ $^
 
 $(OUTDIR)/spawn.js: $(SRCPATCHDIR)/spawn.c
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS_TIMEIT) -o $@ $^
 
-# === whetstone ===
+$(OUTDIR)/context1.js: $(SRCPATCHDIR)/context1.c
+	$(CC) $(CFLAGS_TIMEIT) -o $@ $^
+
 $(OUTDIR)/whetstone-double.js: $(SRCDIR)/whets.c
 	$(CC) $(CFLAGS) -DDP -DGTODay -DUNIXBENCH -o $@ $<
 
+#$(OUTDIR)/execl.js: $(SRCPATCHDIR)/execl.c
+#	$(CC) $(CFLAGS) -o $@ $^
 
-# $(PROGDIR)/dhry2.js: CFLAGS += -DHZ=${HZ}
-# $(PROGDIR)/dhry2.js: $(SRCDIR)/dhry_1.c $(SRCDIR)/dhry_2.c \
-#                   $(SRCDIR)/dhry.h $(SRCDIR)/timeit.c
-# 	$(CC) -o $@ ${CFLAGS} $(SRCDIR)/dhry_1.c $(SRCDIR)/dhry_2.c
-
-# $(PROGDIR)/dhry2reg.js: CFLAGS += -DHZ=${HZ} -DREG=register
-# $(PROGDIR)/dhry2reg.js: $(SRCDIR)/dhry_1.c $(SRCDIR)/dhry_2.c \
-#                      $(SRCDIR)/dhry.h $(SRCDIR)/timeit.c
-# 	$(CC) -o $@ ${CFLAGS} $(SRCDIR)/dhry_1.c $(SRCDIR)/dhry_2.c
-
-
-
-
+# === Dhrystone ===
+# The Dhrystone test is originally divided in two files:
+# dhry_1.c and dhry_2.c. The first file contains the main function
+# and the second file contains the rest of the code. The two files
+# are combined into one file (dhry_combined.c) to avoid the need
+# to link two files together.
+#
+# $(OUTDIR)/dhry2.js: CFLAGS += -DHZ=$(HZ)
+# $(OUTDIR)/dhry2.js: $(SRCPATCHDIR)/dhry_combined.c 
+# 	$(CC) $(CFLAGS_TIMEIT) -o $@ $(SRCPATCHDIR)/dhry_combined.c
+#  
+# $(OUTDIR)/dhry2reg.js: CFLAGS += -DHZ=$(HZ) -DREG=register
+# $(OUTDIR)/dhry2reg.js: $(SRCPATCHDIR)/dhry_combined.c 
+# 	$(CC) $(CFLAGS) -o $@ $(SRCPATCHDIR)/dhry_combined.c
 
 
 # === Clean ===
@@ -132,4 +135,4 @@ clean:
 	rm -rf $(OUTDIR)/*.wasm
 
 run:
-	bash ./Run
+	./Run
