@@ -1,3 +1,19 @@
+/*
+ *
+ * WASM Strategic Choices:
+ * - Replaced fork()/wait() with pthread_create()/pthread_join() to simulate
+ *   unit-of-work cycles in a WebAssembly-compatible way. WebAssembly does not
+ *   support process creation or Unix-style forking due to its sandboxed memory model.
+ *
+ *
+ * This version prioritizes compatibility and portability to WebAssembly
+ * over strict fidelity to native Unix behavior. The goal is to retain
+ * meaningful performance metrics (iterations per second) under the constraints
+ * of the WebAssembly threading model.
+ *
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
