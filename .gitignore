@@ -1,5 +1,4 @@
 .vscode/
-byte-unixbench/
 wasibench/*.js
 wasibench/*.wasm
 results/
