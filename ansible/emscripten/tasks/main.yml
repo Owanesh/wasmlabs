@@ -1,0 +1,43 @@
+- name: Install dependencies
+  apt:
+    name:
+      - git
+      - python3
+      - python3-pip
+      - cmake
+      - build-essential
+    state: present
+    update_cache: yes
+
+- name: Clone emsdk repository
+  git:
+    repo: "{{ emsdk_git_url }}"
+    dest: "{{ emsdk_dir }}"
+    version: "{{ emsdk_branch }}"
+    update: yes
+
+
+- name: Install Emscripten SDK and Binaryen
+  shell: |
+    ./emsdk install latest
+    ./emsdk activate latest
+  args:
+    chdir: "{{ emsdk_dir }}"
+    executable: /bin/bash
+    creates: "{{ emsdk_dir }}/upstream/emscripten"
+  environment:
+    PATH: "{{ lookup('env', 'PATH') }}"
+
+- name: Add emsdk to bashrc
+  lineinfile:
+    path: /etc/profile.d/emsdk.sh
+    create: yes
+    line: 'source {{ emsdk_dir }}/emsdk_env.sh'
+    mode: '0755'
+
+- name: Test that emcc is available
+  shell: |
+    source {{ emsdk_dir }}/emsdk_env.sh
+    which emcc && emcc --version
+  args:
+    executable: /bin/bash
