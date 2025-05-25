@@ -94,7 +94,7 @@ $(OUTDIR)/hanoi.js: $(SRCDIR)/hanoi.c
 $(OUTDIR)/fstime.js: $(SRCDIR)/fstime.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-$(OUTDIR)/syscall.js: $(SRCDIR)/syscall.c
+$(OUTDIR)/syscall.js: $(SRCPATCHDIR)/syscall.c
 	$(CC) $(CFLAGS_TIMEIT) -o $@ $^
 
 # === PATCHED ===

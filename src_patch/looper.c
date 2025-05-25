@@ -36,11 +36,11 @@
 unsigned long iter = 0;
 char **cmd_argv;
 int cmd_argc;
-volatile int stop = 0;  // 🔧 flag per fermare il ciclo
+volatile int stop = 0;  
 
 void report(void)
 {
-    stop = 1;  // 🔧 segnala lo stop, non esce subito
+    stop = 1;  
 }
 
 void* run_command(void* arg)
@@ -90,9 +90,9 @@ int main(int argc, char* argv[])
     cmd_argv = &argv[2];
 
     iter = 0;
-    wake_me(duration, report);  // 🔧 imposta la sveglia
+    wake_me(duration, report); 
 
-    while (!stop) {  // 🔧 esce solo quando wake_me chiama report
+    while (!stop) { 
         pthread_t thread;
         if (pthread_create(&thread, NULL, run_command, NULL) != 0) {
             fprintf(stderr, "Thread creation failed at iteration %lu\n", iter);
@@ -104,7 +104,6 @@ int main(int argc, char* argv[])
         iter++;
     }
 
-    // 🔧 stampa risultato dopo uscita naturale dal ciclo
     fprintf(stderr, "COUNT|%lu|60|lpm\n", iter);
     return 0;
 }
