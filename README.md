@@ -15,18 +15,22 @@
 
 ## 📦 What's Inside
 
-- 🔄 `Makefile` – A minimal Makefile to build selected benchmarks (`arithoh`, `dhry2`, `whetstone-double`) for WASI.
-- 🧩 `src/` – Source code patches and overrides (`wasitime.h`) to stub missing POSIX APIs in WASI.
+- 🔄 `Makefile` – A minimal Makefile to build selected benchmarks with emscritpen for wasm
+- 🧩 `src_patch/` – Source code patches and overrides (`wasitime.h`) to stub missing POSIX APIs in WASI.
 - 📊 `results/` – Scripts and data for running and comparing results.
 
 
 ## 🚀 Getting Started
 
-1. **Install WASI SDK** (e.g., at `/opt/wasi-sdk`). 🛠️
-2. **Clone byte-unixbench** repo 
+1. **Install emscripten**
+    ```sh
+    ansible-playbook ansible/playbook.yml
+    source ~/.zshrc # or ~/.bashrc
+    ```
+2. **Update submodules** : `git submodule update`
 3. **Tune original bench suite**
 
-    - **src/ime.c** : since webassembly doesn't provide support for Signal/Alarm we need to avoid that this file is considered during compilation for wasm target
+    - **src/time.c** : since webassembly doesn't provide support for Signal/Alarm we need to avoid that this file is considered during compilation for wasm target
     ```c 
     #if defined(__GNUC__) && !defined(__wasi__)&& !defined(__EMSCRIPTEN__) && !defined(__wasix__)
     #include <signal.h>
@@ -43,9 +47,6 @@
 
     #endif
     ```
-    - **src/syscall.c**, swap at lines 82 and 97 `syscall(SYS_getpid);` with `getpid();`
-
-    
 
 3. **Build the benchmarks**:
     ```bash
@@ -53,7 +54,7 @@
     ```
 4. **Run with a Node runtime**: adaptation of original Perl script
    ```bash
-    ./Run 
+    ./Run  # or make run
    ```
 
 
