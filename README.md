@@ -27,7 +27,7 @@
     ansible-playbook ansible/playbook.yml
     source ~/.zshrc # or ~/.bashrc
     ```
-2. **Update submodules** : `git submodule update`
+2. **Update submodules** : `git submodule update --init --recursive`
 3. **Tune original bench suite**
 
     - **src/time.c** : since webassembly doesn't provide support for Signal/Alarm we need to avoid that this file is considered during compilation for wasm target

@@ -24,6 +24,24 @@
     state: present
   become: false  
   when: ansible_facts['os_family'] == "Darwin"
+  
+- name: Create Emscripten cache directory in user home
+  become: false
+  file:
+    path: "{{ lookup('env', 'HOME') }}/.emscripten_cache"
+    state: directory
+    mode: '0755'
+  when: ansible_facts['os_family'] == "Darwin"
+
+- name: Set EM_CACHE in .zshrc in user home
+  become: false
+  lineinfile:
+    path: "{{ lookup('env', 'HOME') }}/.zshrc"
+    line: 'export EM_CACHE="$HOME/.emscripten_cache"'
+    create: yes
+    insertafter: EOF
+  when: ansible_facts['os_family'] == "Darwin"
+
 
 # -------------------------------
 # Emscripten install (Linux only)
