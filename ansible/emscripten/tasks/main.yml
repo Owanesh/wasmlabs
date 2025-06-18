@@ -1,4 +1,8 @@
-- name: Install dependencies
+# -------------------------------
+# Dependencies
+# -------------------------------
+
+- name: Install dependencies on Debian/Ubuntu
   apt:
     name:
       - git
@@ -8,6 +12,22 @@
       - build-essential
     state: present
     update_cache: yes
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Install dependencies and Emscripten on macOS
+  community.general.homebrew:
+    name:
+      - git
+      - python
+      - cmake
+      - emscripten
+    state: present
+  become: false  
+  when: ansible_facts['os_family'] == "Darwin"
+
+# -------------------------------
+# Emscripten install (Linux only)
+# -------------------------------
 
 - name: Clone emsdk repository
   git:
@@ -15,7 +35,7 @@
     dest: "{{ emsdk_dir }}"
     version: "{{ emsdk_branch }}"
     update: yes
-
+  when: ansible_facts['os_family'] != "Darwin"
 
 - name: Install Emscripten SDK and Binaryen
   shell: |
@@ -27,17 +47,26 @@
     creates: "{{ emsdk_dir }}/upstream/emscripten"
   environment:
     PATH: "{{ lookup('env', 'PATH') }}"
+  when: ansible_facts['os_family'] != "Darwin"
 
-- name: Add emsdk to bashrc
+# -------------------------------
+# Environment Setup
+# -------------------------------
+
+- name: Add emsdk to shell profile (Linux)
   lineinfile:
     path: /etc/profile.d/emsdk.sh
     create: yes
     line: 'source {{ emsdk_dir }}/emsdk_env.sh'
     mode: '0755'
+  when: ansible_facts['os_family'] != "Darwin"
+
+# -------------------------------
+# Verification
+# -------------------------------
 
 - name: Test that emcc is available
   shell: |
-    source {{ emsdk_dir }}/emsdk_env.sh
     which emcc && emcc --version
   args:
     executable: /bin/bash
