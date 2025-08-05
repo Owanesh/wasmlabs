@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+ 	<head><meta charset="utf-8"></head>
+ 	<body>
+		<h1>Source</h1>
+		<pre id="source">0c685e21441fe35b2f45d84d88eceaa05e159ee3d2d3cb650bbf405f7c36615c.wasm.wasm</pre>
+
+		<h1>Output</h1>
+		<pre id="output"></pre>
+
+        <script type="text/javascript" src="out/benign_1a9f18234a3c9ee202498fe04733b303ce459f7f34fb6c9a1d8a33da918e6f10.wasabi.js"></script>
+        <script type="text/javascript" src="log_all.js"></script>
+        <script type="text/javascript">
+			function output(string) {
+				document.getElementById("output").innerHTML += string;
+			}
+			// "async main"
+			(async function() {
+			 
+				let importObject = {
+					env: {
+						output,
+					}
+				};
+
+				let {module, instance} = await fetch("out/benign_1a9f18234a3c9ee202498fe04733b303ce459f7f34fb6c9a1d8a33da918e6f10.wasm")
+					.then(response => response.arrayBuffer())
+					.then(arrayBuffer => WebAssembly.instantiate(arrayBuffer, importObject));
+
+				// instance.exports.main();
+			})();
+		</script>
+	</body>
+</html>

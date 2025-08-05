@@ -2,3 +2,4 @@
 wasibench/*.js
 wasibench/*.wasm
 results/
+.DS_Store

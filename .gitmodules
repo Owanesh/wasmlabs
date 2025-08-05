@@ -1,3 +1,6 @@
-[submodule "byte-unixbench"]
-	path = byte-unixbench
+[submodule "wasibench/byte-unixbench"]
+	path = wasibench/byte-unixbench
 	url = https://github.com/kdlucas/byte-unixbench.git
+[submodule "malprof/jsmp/javascript-malware-collection"]
+	path = malprof/jsmp/javascript-malware-collection
+	url = https://github.com/HynekPetrak/javascript-malware-collection
