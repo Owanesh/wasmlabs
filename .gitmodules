@@ -4,3 +4,6 @@
 [submodule "malprof/jsmp/javascript-malware-collection"]
 	path = malprof/jsmp/javascript-malware-collection
 	url = https://github.com/HynekPetrak/javascript-malware-collection
+[submodule "malprof/javascript-collection/javascript-malware-collection"]
+	path = malprof/javascript-collection/javascript-malware-collection
+	url = https://github.com/HynekPetrak/javascript-malware-collection
