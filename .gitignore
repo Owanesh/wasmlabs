@@ -3,3 +3,5 @@ wasibench/*.js
 wasibench/*.wasm
 results/
 .DS_Store
+malware_analysis/crypto_javascript/.env
+malware_analysis/crypto_javascript/VT_miners.csv
