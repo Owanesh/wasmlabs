@@ -4,11 +4,14 @@ This repository contains experiments and prototypes around WebAssembly (WASM). I
 
 ## Structure
 
-- `benchmark_wasi/` — Experiments focused on benchmarking WebAssembly workloads. This includes harnesses, patches, and integrations (e.g., UnixBench-based workloads) to assess performance across runtimes and configurations.
+This repository is organized into several main folders, each serving a distinct purpose:
 
-- `malware_analysis/` — Experiments focused on manipulation and analysis of WebAssembly malware. This may include toy samples, instrumentation, and transformation experiments aimed at understanding behavior and potential defenses.
+- **benchmark_wasi/**  
+  Contains experiments and tools for benchmarking WebAssembly (WASM) workloads. Includes adaptations of classic UnixBench tests, scripts for running and collecting results, and patches for WASI compatibility.
 
-## Notes
+- **malware_analysis/**  
+  Focuses on the analysis and manipulation of WebAssembly-based malware. Contains scripts for static and dynamic analysis, cryptojacking research, and utilities for inspecting and transforming WASM and JavaScript samples.
 
-- Content under `wasibench/` is intended for performance analysis and reproducibility of benchmark runs.
-- Content under `malprof/` is intended strictly for research and educational purposes related to malware analysis and manipulation in a controlled environment.
+---
+
+Each folder contains its own README or documentation with more details about its contents and usage.
